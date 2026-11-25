@@ -122,6 +122,15 @@ button,input,select,textarea{font:inherit;color:inherit}
 .opts.err .opt{border-color:var(--orange)}
 .ferr{color:#ffb399;font-weight:800;font-size:.9rem}
 
+.mapwrap{position:relative}
+.mapctl{position:absolute;top:6px;right:6px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.mapctl button{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.35rem;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 1px 4px rgba(12,47,77,.18)}
+.mapctl button:hover:not([disabled]){border-color:var(--ink)}
+.mapctl button[disabled]{opacity:.4;cursor:default}
+#map svg{user-select:none;-webkit-user-select:none}
+#map.zoomed svg{cursor:grab;touch-action:none}
+#map.dragging svg{cursor:grabbing}
+
 /* Buttons */
 .btn{border:1.5px solid var(--btn);background:transparent;color:var(--ink);border-radius:80px;padding:10px 22px;cursor:pointer;font-weight:800;min-height:44px}
 .btn:hover{background:var(--surface)}
@@ -141,11 +150,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:14px;height:14px;border-radius:50%;flex:none;display:inline-block}
 .legend i.ok{background:var(--ok-solid)} .legend i.part{background:var(--part-solid)}
-.legend i.zero{border:2px solid var(--muted);background:var(--surface)} .legend i.home{background:var(--purple)}
+.legend i.zero{border:2px solid var(--muted);background:var(--surface)} .legend i.home{border-radius:4px;background:rgba(108,71,150,.24);border:1.5px solid var(--purple)}
 .mapfoot{display:flex;flex-wrap:wrap;gap:4px 16px;justify-content:space-between;align-items:center;font-size:.82rem}
 
 /* Karte (SVG) */
 .map .land{fill:var(--land);stroke:none}
+.map .gb.hm{fill:var(--purple);fill-opacity:.24;stroke:var(--purple);stroke-width:1.8;opacity:1;pointer-events:none}
 .map .gb{fill:none;stroke:var(--land-line);stroke-width:.9;opacity:.4;stroke-linejoin:round}
 .map .lo{fill:none;stroke:var(--land-line);stroke-width:2;stroke-linejoin:round}
 .map .river{fill:none;stroke:var(--river);stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
@@ -161,8 +171,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 .map .mk .ring{fill:none;stroke:var(--orange);stroke-width:3.5;opacity:0}
 .map .mk.sel .ring{opacity:1}
 .map .mk:hover circle.b{filter:brightness(1.08)}
-.map .home circle.o{fill:var(--purple);stroke:var(--surface);stroke-width:2.5}
-.map .home text{font-family:var(--font-body);font-size:11px;font-weight:800;fill:var(--purple);text-anchor:middle;paint-order:stroke;stroke:var(--land);stroke-width:3.5px}
 
 /* Rechte Spalte */
 .side{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px;display:flex;flex-direction:column;gap:16px;min-width:0}
@@ -256,8 +264,14 @@ footer.fn{font-size:.82rem;color:var(--muted);max-width:90ch}
 
   <div class="main">
     <section class="mapcard" aria-label="Karte der Angebote">
-      <div id="map"></div>
-      <div class="legend"><span><i class="ok"></i>alle Zeiten frei</span><span><i class="part"></i>teilweise frei</span><span><i class="zero"></i>belegt</span><span><i class="home"></i>Zuhause</span></div>
+      <div class="mapwrap"><div id="map"></div>
+        <div class="mapctl" role="group" aria-label="Kartenzoom">
+          <button type="button" id="zin" aria-label="Hineinzoomen" title="Hineinzoomen">+</button>
+          <button type="button" id="zout" aria-label="Herauszoomen" title="Herauszoomen" disabled>−</button>
+          <button type="button" id="zrst" aria-label="Ganze Karte anzeigen" title="Ganze Karte anzeigen" disabled>⤢</button>
+        </div>
+      </div>
+      <div class="legend"><span><i class="ok"></i>alle Zeiten frei</span><span><i class="part"></i>teilweise frei</span><span><i class="zero"></i>belegt</span><span><i class="home"></i>Ihre Gemeinde</span></div>
       <div class="mapfoot"><span class="muted">Zahl im Punkt = freie Zeiten pro Woche.</span><button class="link" id="sim" type="button">Demo: Platz wird frei</button></div>
     </section>
     <section class="side" id="panel" aria-live="polite"></section>
@@ -366,10 +380,68 @@ function compute(){
 function cls(r){return r.need&&r.ok.length===r.need?"ok":r.ok.length?"part":"zero"}
 
 /* Karte */
+var BASEW=460,BASEH=700,ZMAX=6,Z={x:0,y:0,w:BASEW,h:BASEH};
+function applyZ(){
+  var s=$("map").querySelector("svg");
+  if(s)s.setAttribute("viewBox",Z.x.toFixed(1)+" "+Z.y.toFixed(1)+" "+Z.w.toFixed(1)+" "+Z.h.toFixed(1));
+  var zoomed=Z.w<BASEW-.5;
+  $("map").classList.toggle("zoomed",zoomed);
+  $("zout").disabled=!zoomed;$("zrst").disabled=!zoomed;$("zin").disabled=Z.w<=BASEW/ZMAX+.5;
+}
+function clampZ(){var pad=30;Z.x=Math.max(-pad,Math.min(BASEW-Z.w+pad,Z.x));Z.y=Math.max(-pad,Math.min(BASEH-Z.h+pad,Z.y))}
+function zgeom(){var s=$("map").querySelector("svg"),r=s.getBoundingClientRect(),k=Math.min(r.width/Z.w,r.height/Z.h);return{r:r,k:k,ox:(r.width-Z.w*k)/2,oy:(r.height-Z.h*k)/2}}
+function zoomAt(f,cx,cy){
+  var p;
+  if(cx==null)p=[Z.x+Z.w/2,Z.y+Z.h/2];
+  else{var g=zgeom();p=[Z.x+(cx-g.r.left-g.ox)/g.k,Z.y+(cy-g.r.top-g.oy)/g.k]}
+  var fx=(p[0]-Z.x)/Z.w,fy=(p[1]-Z.y)/Z.h;
+  var w=Math.max(BASEW/ZMAX,Math.min(BASEW,Z.w/f));
+  Z.w=w;Z.h=w*BASEH/BASEW;Z.x=p[0]-fx*Z.w;Z.y=p[1]-fy*Z.h;clampZ();applyZ();
+}
+function zoomReset(){Z={x:0,y:0,w:BASEW,h:BASEH};applyZ()}
+var zptr={},zdrag=null,zpinch=null,zmoved=false;
+function zoomBind(){
+  var m=$("map");
+  $("zin").addEventListener("click",function(){zoomAt(1.6)});
+  $("zout").addEventListener("click",function(){zoomAt(1/1.6)});
+  $("zrst").addEventListener("click",zoomReset);
+  m.addEventListener("wheel",function(e){if(e.ctrlKey||e.metaKey){e.preventDefault();zoomAt(Math.exp(-e.deltaY*0.012),e.clientX,e.clientY)}},{passive:false});
+  m.addEventListener("dblclick",function(e){e.preventDefault();zoomAt(2,e.clientX,e.clientY)});
+  m.addEventListener("click",function(e){if(zmoved){e.stopPropagation();e.preventDefault()}},true);
+  m.addEventListener("pointerdown",function(e){
+    zptr[e.pointerId]={x:e.clientX,y:e.clientY};zmoved=false;
+    var ids=Object.keys(zptr);
+    if(ids.length===2){var a=zptr[ids[0]],b=zptr[ids[1]];zpinch={d:Math.hypot(a.x-b.x,a.y-b.y)||1,w:Z.w};zdrag=null}
+    else if(ids.length===1&&Z.w<BASEW-.5)zdrag={x:e.clientX,y:e.clientY,zx:Z.x,zy:Z.y};
+  });
+  window.addEventListener("pointermove",function(e){
+    if(!zptr[e.pointerId])return;
+    zptr[e.pointerId]={x:e.clientX,y:e.clientY};
+    var ids=Object.keys(zptr);
+    if(zpinch&&ids.length===2){
+      var a=zptr[ids[0]],b=zptr[ids[1]],d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+      var target=Math.max(BASEW/ZMAX,Math.min(BASEW,zpinch.w/(d/zpinch.d)));
+      zmoved=true;zoomAt(Z.w/target,(a.x+b.x)/2,(a.y+b.y)/2);
+    }else if(zdrag&&ids.length===1){
+      var dx=e.clientX-zdrag.x,dy=e.clientY-zdrag.y;
+      if(Math.hypot(dx,dy)>4){zmoved=true;m.classList.add("dragging")}
+      if(zmoved){var g=zgeom();Z.x=zdrag.zx-dx/g.k;Z.y=zdrag.zy-dy/g.k;clampZ();applyZ()}
+    }
+  });
+  function zup(e){
+    delete zptr[e.pointerId];
+    if(Object.keys(zptr).length<2)zpinch=null;
+    if(!Object.keys(zptr).length){zdrag=null;m.classList.remove("dragging");setTimeout(function(){zmoved=false},0)}
+  }
+  window.addEventListener("pointerup",zup);window.addEventListener("pointercancel",zup);
+  applyZ();
+}
 function renderMap(){
-  var s='<svg class="map" viewBox="0 0 460 700" role="img" aria-label="Karte von Liechtenstein mit den passenden Angeboten">';
+  var s='<svg class="map" viewBox="'+Z.x.toFixed(1)+' '+Z.y.toFixed(1)+' '+Z.w.toFixed(1)+' '+Z.h.toFixed(1)+'" role="img" aria-label="Karte von Liechtenstein mit den passenden Angeboten">';
   s+='<path class="land" d="'+GEO.land+'"/>';
-  Object.keys(GEO.gem).forEach(function(g){s+='<path class="gb" d="'+GEO.gem[g]+'"/>'});
+  var hg=S.ready?(S.gem==="Nendeln"?"Eschen":S.gem):null;
+  Object.keys(GEO.gem).forEach(function(g){if(g!==hg)s+='<path class="gb" d="'+GEO.gem[g]+'"/>'});
+  if(hg&&GEO.gem[hg])s+='<path class="gb hm" d="'+GEO.gem[hg]+'"><title>Ihre Gemeinde: '+hg+'</title></path>';
   s+='<path class="river" d="'+GEO.rhine+'"/><path class="lo" d="'+GEO.land+'"/>';
   Object.keys(GEO.lab).forEach(function(g){
     var l=GEO.lab[g],pt=GEO.pt[g],left=l.s==="l";
@@ -382,8 +454,7 @@ function renderMap(){
     s+='<g class="mk '+c+(S.sel===i.id?" sel":"")+'" data-id="'+i.id+'" tabindex="0" role="button" aria-label="'+esc(i.name)+', '+r.ok.length+' von '+r.need+' Zeiten frei" transform="translate('+x.toFixed(1)+','+y.toFixed(1)+')">'+
       '<title>'+esc(i.name)+'</title><circle class="ring" r="17"/><circle class="b" r="13"/><text>'+(r.ok.length||"–")+'</text></g>';
   });
-  var hp=GEO.pt[S.gem];
-  if(S.ready)s+='<g class="home"><circle class="o" cx="'+hp[0]+'" cy="'+hp[1]+'" r="6.5"/><text x="'+hp[0]+'" y="'+(hp[1]-12)+'">Zuhause</text></g></svg>';
+  s+='</svg>';
   $("map").innerHTML=s;
 }
 
@@ -613,6 +684,7 @@ function obBind(){
   });
 }
 function bind(){
+  zoomBind();
   $("ftog").addEventListener("click",function(){if(!S.ready){obOpen();return}setFilterOpen($("filters").hidden)});
   obBind();
   $("sim").addEventListener("click",simulate);
