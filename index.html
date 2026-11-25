@@ -131,6 +131,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 #map.zoomed svg{cursor:grab;touch-action:none}
 #map.dragging svg{cursor:grabbing}
 
+.two2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
 /* Buttons */
 .btn{border:1.5px solid var(--btn);background:transparent;color:var(--ink);border-radius:80px;padding:10px 22px;cursor:pointer;font-weight:800;min-height:44px}
 .btn:hover{background:var(--surface)}
@@ -314,15 +316,15 @@ var INST=[
  {"id":"i6","name":"Kita & Tagesstrukturen Vaduz","op":"Verein Kindertagesstätten","gem":"Vaduz","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.6,"seed":81},
  {"id":"i7","name":"Kita Purzelbaum","op":"","gem":"Vaduz","loc":"","types":["kita"],"min":3,"max":60,"slots":["vm","mt","nm"],"ferien":true,"fill":0.55,"seed":95},
  {"id":"i8","name":"Kita Rehkids","op":"","gem":"Vaduz","loc":"","types":["kita"],"min":3,"max":60,"slots":["vm","mt","nm"],"ferien":true,"fill":0.35,"seed":109},
- {"id":"i9","name":"Kinderoase Vaduz","op":"Verein Kinderoase · Spontanhütedienst","gem":"Vaduz","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.62,"seed":123},
+ {"id":"i9","flex":true,"name":"Kinderoase Vaduz","op":"Verein Kinderoase · Spontanhütedienst","gem":"Vaduz","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.62,"seed":123},
  {"id":"i10","name":"Kita & Tagesstrukturen Schaan","op":"Verein Kindertagesstätten","gem":"Schaan","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.5,"seed":137},
  {"id":"i11","name":"SiNi Kidz Highway","op":"Kita & Tagesstrukturen","gem":"Schaan","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.45,"seed":151},
  {"id":"i12","name":"Waldorf Kita & Tagesstrukturen","op":"Liechtensteinische Waldorfschule","gem":"Schaan","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":false,"fill":0.3,"seed":165},
- {"id":"i13","name":"Tagesfamilien","op":"Eltern Kind Forum","gem":"Schaan","loc":"ganzes Land","types":["tagesfamilie"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.55,"seed":179},
+ {"id":"i13","flex":true,"name":"Tagesfamilien","op":"Eltern Kind Forum","gem":"Schaan","loc":"ganzes Land","types":["tagesfamilie"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.55,"seed":179},
  {"id":"i14","name":"Kita & Tagesstrukturen Eschen","op":"Verein Kindertagesstätten","gem":"Eschen","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.42,"seed":193},
  {"id":"i15","name":"Mittagstisch Nendeln","op":"Verein Kindertagesstätten","gem":"Nendeln","loc":"","types":["mittagstisch"],"min":48,"max":144,"slots":["mt"],"ferien":false,"fill":0.4,"seed":207},
  {"id":"i16","name":"Kita Star Mauren","op":"Kindertagesstätte Star GmbH","gem":"Mauren","loc":"","types":["kita"],"min":3,"max":60,"slots":["vm","mt","nm"],"ferien":true,"fill":0.5,"seed":221},
- {"id":"i17","name":"Kinderoase Mauren","op":"Verein Kinderoase · Spontanhütedienst","gem":"Mauren","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.58,"seed":235},
+ {"id":"i17","flex":true,"name":"Kinderoase Mauren","op":"Verein Kinderoase · Spontanhütedienst","gem":"Mauren","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.58,"seed":235},
  {"id":"i18","name":"Zois Home Kita","op":"","gem":"Mauren","loc":"","types":["kita"],"min":6,"max":60,"slots":["vm","mt","nm"],"ferien":false,"fill":0.35,"seed":249},
  {"id":"i19","name":"Mittagstisch Schaanwald","op":"Verein Kinderoase","gem":"Mauren","loc":"Schaanwald","types":["mittagstisch"],"min":48,"max":144,"slots":["mt"],"ferien":false,"fill":0.45,"seed":263},
  {"id":"i20","name":"Kita & Tagesstrukturen Gamprin","op":"Kindertagesstätte Pimbolino","gem":"Gamprin","loc":"","types":["kita","tagesstruktur"],"min":3,"max":144,"slots":["vm","mt","nm"],"ferien":true,"fill":0.4,"seed":277},
@@ -335,22 +337,37 @@ function byId(id){return INST.filter(function(i){return i.id===id})[0]}
 
 function rng(seed){var a=seed>>>0;return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 var store={}, fresh={};
+function todayISO(){var t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
+function fmtD(s){if(!s)return "";var q=s.split("-");return q[2]+"."+q[1]+"."+q[0]}
+function addDays(iso,n){var d=new Date(iso+"T12:00:00");d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function termError(term,start,end){
+  if(!start)return term==="kurz"?"Bitte wählen Sie ein Startdatum.":"Bitte wählen Sie einen gewünschten Start.";
+  if(start<todayISO())return "Das Startdatum liegt in der Vergangenheit.";
+  if(term==="kurz"){if(!end)return "Bitte wählen Sie ein Enddatum.";if(end<start)return "Das Enddatum muss am oder nach dem Startdatum liegen."}
+  return "";
+}
+function termLabel(){
+  if(S.term==="kurz")return "kurzfristig "+fmtD(S.start)+(S.end?"–"+fmtD(S.end):"");
+  return "langfristig ab "+fmtD(S.start);
+}
+function dateSeed(){var s=S.term==="kurz"?S.start+S.end:"",n=0;for(var i=0;i<s.length;i++)n=(n*31+s.charCodeAt(i))%9973;return n}
 function getAvail(inst,mode,per){
-  var key=inst.id+"|"+mode+"|"+(mode==="ferien"?per:0);
+  var kurz=S.term==="kurz",key=inst.id+"|"+mode+"|"+(mode==="ferien"?per:0)+"|"+(kurz?"k"+S.start+S.end:"l");
   if(store[key])return store[key];
-  var a={}, r=rng(inst.seed*31+(mode==="ferien"?per*7+5:0));
+  var a={}, r=rng(inst.seed*31+(mode==="ferien"?per*7+5:0)+(kurz?97+dateSeed():0));
   var off=mode==="ferien"&&!inst.ferien;
   ALLD.forEach(function(d){a[d]={};ALLS.forEach(function(s){
     var v=r();
     if(off||inst.slots.indexOf(s)<0){a[d][s]=null;return}
-    var fill=inst.fill+(mode==="ferien"?.12:0);
-    a[d][s]=v<fill?0:v<fill+.25?1:v<fill+.42?2:3;
+    var fill=inst.fill*.16+(mode==="ferien"?.03:0);
+    if(kurz)fill=inst.flex?Math.max(.01,fill-.05):fill+.03;
+    a[d][s]=v<fill?0:v<fill+.3?1:v<fill+.55?2:3;
   })});
   store[key]=a;return a;
 }
 var minsAgo=function(inst){return 2+(inst.seed*7)%47};
 
-var S={age:24,ageVal:"2",ageUnit:"j",gem:"Eschen",mode:"normal",per:0,grid:{},types:{kita:1,tagesstruktur:1,mittagstisch:1,tagesfamilie:1},start:"",ready:false,last:[],view:"list",sel:null,hidden:0};
+var S={age:24,ageVal:"2",ageUnit:"j",gem:"Eschen",mode:"normal",per:0,grid:{},types:{kita:1,tagesstruktur:1,mittagstisch:1,tagesfamilie:1},start:"",end:"",term:"lang",ready:false,last:[],view:"list",sel:null,hidden:0};
 ["mo","mi","do"].forEach(function(d){ALLS.forEach(function(s){S.grid[d+"|"+s]=1})});
 (function(){var t=new Date();t.setMonth(t.getMonth()+1,1);S.start=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-01"})();
 
@@ -494,6 +511,7 @@ function detailHTML(r){
   if(r.full.length)act+='<button class="btn" data-wait="'+i.id+'" type="button">Auf die Warteliste ('+r.full.length+')</button>';
   return '<div class="detail"><button class="link back" data-back type="button">‹ Zurück zur Liste</button>'+
     '<div class="dhead"><h2>'+esc(i.name)+'</h2><p class="muted">'+i.types.map(function(t){return TYPES[t]}).join(' + ')+' · '+(i.loc||i.gem)+(i.op?' · '+esc(i.op):"")+(f?' · <span class="pill fresh">Neu frei</span>':"")+'</p></div>'+
+    '<p class="small muted">Dauer: '+termLabel()+'</p>'+
     '<div class="frac '+c+'"><b class="num">'+r.ok.length+' von '+r.need+'</b><span>gesuchten Zeiten frei</span></div>'+
     miniGrid(r)+
     '<div class="gl2"><span><i class="a"></i>frei (Plätze)</span><span><i class="b"></i>belegt</span><span><i class="c2"></i>nicht angeboten</span><span><i class="d2"></i>gesucht</span></div>'+miss+
@@ -527,7 +545,7 @@ function openRes(id,kind){
    '<p class="small muted">'+(kind==="wait"?"Sobald eine dieser Zeiten frei wird, erhalten Sie eine Nachricht und 48 Stunden Zeit zur Bestätigung.":"Der Platz wird 48 Stunden für Sie gehalten. Danach verfällt die Reservation, wenn die Einrichtung sie nicht bestätigt hat.")+'</p>'+
    '<form id="rf" novalidate><div class="field"><label for="rc">Vorname des Kindes</label><input type="text" id="rc" autocomplete="off"></div>'+
    '<div class="field"><label for="re">E-Mail der Eltern</label><input type="email" id="re" autocomplete="off"></div>'+
-   '<div class="field"><label for="rs">Startdatum</label><input type="date" id="rs" value="'+S.start+'"></div>'+
+   '<p class="small"><b>Dauer:</b> '+termLabel()+'</p>'+
    '<p class="small" id="rerr" style="color:var(--orange-ink);min-height:1.4em" role="alert"></p>'+
    '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="submit">'+(kind==="wait"?"Auf Warteliste setzen":"Verbindlich reservieren")+'</button><button type="button" class="btn" id="rx">Abbrechen</button></div></form>';
   $("ov").hidden=false;$("rc").focus();
@@ -576,13 +594,20 @@ function summaryText(){
     var sl=sig[0].split(",");
     when=dl+" "+(sl.length===3?"ganztags":sl.map(function(s){return SLOTS[ALLS.indexOf(s)][1].toLowerCase()}).join(" + "));
   }else when=ks.length+" Zeiten pro Woche";
-  return head+when+" · "+per;
+  return head+when+" · "+per+" · "+termLabel();
 }
 function setFilterOpen(open){
   $("band").classList.toggle("closed",!open);
   $("filters").hidden=!open;
   $("ftog").setAttribute("aria-expanded",open);
   $("ftog").innerHTML=(open?"Einklappen":"Filter ändern")+' <span aria-hidden="true">'+(open?"▴":"▾")+'</span>';
+}
+function datesHTML(){
+  var min=todayISO(),err=termError(S.term,S.start,S.end);
+  var f=S.term==="kurz"
+   ?'<div class="two2"><div class="fg"><label class="fl" for="start">Von</label><input type="date" id="start" min="'+min+'" value="'+S.start+'"></div><div class="fg"><label class="fl" for="end">Bis</label><input type="date" id="end" min="'+(S.start||min)+'" value="'+S.end+'"></div></div>'
+   :'<div class="fg"><label class="fl" for="start">Gewünschter Start</label><input type="date" id="start" min="'+min+'" value="'+S.start+'"></div>';
+  return f+'<p class="ferr" id="terr" role="alert"'+(err?"":" hidden")+'>'+err+'</p>';
 }
 function buildFilters(){
   var types=Object.keys(TYPES).map(function(k){return [k,TYPES[k]]});
@@ -593,19 +618,21 @@ function buildFilters(){
    '<div class="fg wide"><span class="fl">Zeitraum</span><div class="tog" data-grp="mode"><button type="button" data-mode="normal" aria-pressed="'+(S.mode==="normal")+'">Normale Woche</button><button type="button" data-mode="ferien" aria-pressed="'+(S.mode==="ferien")+'">Schulferien</button></div></div>'+
    '<div class="fg wide" id="perwrap"'+(S.mode==="ferien"?"":" hidden")+'><label class="fl" for="per">Ferienperiode</label><select id="per">'+PERIODS.map(function(p,i){return '<option value="'+i+'"'+(i===S.per?" selected":"")+'>'+p+'</option>'}).join("")+'</select></div>'+
    '<div class="fg wide"><span class="fl">Betreuungsart</span><div class="tog">'+tog(types,"t",S.types)+'</div><p class="ferr" id="ferr" role="alert"'+(typesOk()?" hidden":"")+'>Bitte wählen Sie mindestens eine Betreuungsart.</p></div>'+
-   '<div class="fg"><label class="fl" for="start">Gewünschter Start</label><input type="date" id="start" value="'+S.start+'"></div></div>'+
+   '<div class="fg wide"><span class="fl">Dauer</span><div class="tog"><button type="button" data-term="lang" aria-pressed="'+(S.term==="lang")+'">Langfristig</button><button type="button" data-term="kurz" aria-pressed="'+(S.term==="kurz")+'">Kurzfristig</button></div></div>'+
+   '<div class="fg wide" id="dates">'+datesHTML()+'</div></div>'+
    '<div class="fg fright"><span class="fl">Betreuungszeiten pro Tag</span><div class="bwk" id="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+
      DAYS.map(function(d){return '<button type="button" class="h" data-day="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
      SLOTS.map(function(s){return '<button type="button" class="rl" data-slot="'+s[0]+'">'+SHORT[s[0]]+'<span>'+s[2]+'</span></button>'+DAYS.map(function(d){var k=d[0]+"|"+s[0];return '<button type="button" class="cell" data-k="'+k+'" aria-pressed="'+(!!S.grid[k])+'" aria-label="'+d[2]+' '+s[1]+'"></button>'}).join("")}).join("")+
    '</div></div>';
 }
 /* Onboarding */
-var OB={step:0,age:null,ageVal:"",ageUnit:"j",gem:null,mode:"normal",per:0,grid:{},types:{kita:0,tagesstruktur:0,mittagstisch:0,tagesfamilie:0},start:""};
-var OB_Q=["Wie alt ist Ihr Kind?","Wo wohnen Sie?","Wann brauchen Sie Betreuung?","Welche Betreuung suchen Sie?"];
+var OB={step:0,term:null,end:"",age:null,ageVal:"",ageUnit:"j",gem:null,mode:"normal",per:0,grid:{},types:{kita:0,tagesstruktur:0,mittagstisch:0,tagesfamilie:0},start:""};
+var OB_Q=["Wie alt ist Ihr Kind?","Wo wohnen Sie?","Wann brauchen Sie Betreuung?","Wie lange brauchen Sie Betreuung?","Welche Betreuung suchen Sie?"];
 function obValid(){
   if(OB.step===0)return OB.age!==null;
   if(OB.step===1)return OB.gem!==null;
   if(OB.step===2)return Object.keys(OB.grid).some(function(k){return OB.grid[k]});
+  if(OB.step===3)return OB.term!==null;
   return true;
 }
 function obTypesOk(){return Object.keys(OB.types).some(function(k){return OB.types[k]})}
@@ -622,9 +649,15 @@ function obRender(){
       '<p class="obhint">Tippen Sie die Zeiten an. Mit den Tagen oben und den Tageszeiten links wählen Sie ganze Spalten oder Zeilen.</p>'+
       '<div class="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+DAYS.map(function(d){return '<button type="button" class="h" data-oday="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
       SLOTS.map(function(s){return '<button type="button" class="rl" data-oslot="'+s[0]+'">'+SHORT[s[0]]+'<span>'+s[2]+'</span></button>'+DAYS.map(function(d){var k=d[0]+"|"+s[0];return '<button type="button" class="cell" data-ok="'+k+'" aria-pressed="'+(!!OB.grid[k])+'" aria-label="'+d[2]+' '+s[1]+'"></button>'}).join("")}).join("")+'</div>';
+  }else if(n===3){
+    var mn=todayISO();
+    b='<p class="obhint">Langfristig heisst laufend, ohne festes Ende. Kurzfristig ist befristet, zum Beispiel zur Überbrückung.</p><div class="opts" role="group" aria-label="Dauer"><button type="button" class="opt" data-oterm="lang" aria-pressed="'+(OB.term==="lang")+'">Langfristig</button><button type="button" class="opt" data-oterm="kurz" aria-pressed="'+(OB.term==="kurz")+'">Kurzfristig</button></div>'+
+      (OB.term==="lang"?'<div class="field" style="margin:0"><label for="ostart">Gewünschter Start</label><input type="date" id="ostart" min="'+mn+'" value="'+OB.start+'"></div>':"")+
+      (OB.term==="kurz"?'<div class="two"><div class="field" style="margin:0"><label for="ostart">Von</label><input type="date" id="ostart" min="'+mn+'" value="'+OB.start+'"></div><div class="field" style="margin:0"><label for="oend">Bis</label><input type="date" id="oend" min="'+(OB.start||mn)+'" value="'+OB.end+'"></div></div>':"")+
+      '<p class="oerr" id="oterr" role="alert" hidden></p>';
   }else{
     b='<p class="obhint">Wählen Sie mindestens eine Art. Mehrere sind möglich.</p><div class="opts" id="otypes" role="group" aria-label="Betreuungsart">'+Object.keys(TYPES).map(function(k){return '<button type="button" class="opt" data-ot="'+k+'" aria-pressed="'+(!!OB.types[k])+'">'+TYPES[k]+'</button>'}).join("")+'</div>'+
-      '<p class="oerr" id="otyperr" role="alert" hidden>Bitte wählen Sie mindestens eine Betreuungsart.</p><div class="field" style="margin:0"><label for="ostart">Gewünschter Start</label><input type="date" id="ostart" value="'+OB.start+'"></div>';
+      '<p class="oerr" id="otyperr" role="alert" hidden>Bitte wählen Sie mindestens eine Betreuungsart.</p>';
   }
   var prog='<div class="obprog" aria-hidden="true">'+OB_Q.map(function(q,i){return '<i class="'+(i<=n?"on":"")+'"></i>'}).join("")+'</div>';
   $("obm").innerHTML=prog+'<div class="eyebrow">Schritt '+(n+1)+' von '+OB_Q.length+'</div><h2 class="obq" id="obt">'+OB_Q[n]+'</h2><div class="obbody">'+b+'</div>'+
@@ -643,7 +676,7 @@ function obFinish(useDefaults){
     S.age=OB.age;S.ageVal=OB.ageVal;S.ageUnit=OB.ageUnit;S.gem=OB.gem;S.mode=OB.mode;S.per=OB.per;S.grid={};
     Object.keys(OB.grid).forEach(function(k){if(OB.grid[k])S.grid[k]=1});
     S.types={};Object.keys(TYPES).forEach(function(k){S.types[k]=OB.types[k]?1:0});
-    if(OB.start)S.start=OB.start;
+    S.term=OB.term;if(OB.start)S.start=OB.start;S.end=OB.term=="kurz"?OB.end:"";
   }
   S.ready=true;S.view="list";S.sel=null;
   $("ob").hidden=true;
@@ -660,10 +693,13 @@ function obBind(){
     else if(d.ok)OB.grid[d.ok]=OB.grid[d.ok]?0:1;
     else if(d.oday){var ks=SLOTS.map(function(s){return d.oday+"|"+s[0]});var on=ks.every(function(k){return OB.grid[k]});ks.forEach(function(k){OB.grid[k]=on?0:1})}
     else if(d.oslot){var k2=ALLD.map(function(x){return x+"|"+d.oslot});var on2=k2.every(function(k){return OB.grid[k]});k2.forEach(function(k){OB.grid[k]=on2?0:1})}
+    else if(d.oterm){OB.term=d.oterm;if(OB.term==="kurz"&&!OB.end)OB.end=addDays(OB.start||todayISO(),14)}
     else if(d.ot)OB.types[d.ot]=OB.types[d.ot]?0:1;
     else if(d.oback!==undefined){OB.step--;obRender();return}
     else if(d.oskip!==undefined){obFinish(true);return}
-    else if(d.onext!==undefined){if(!obValid())return;if(OB.step===OB_Q.length-1){if(!obTypesOk()){$("otyperr").hidden=false;$("otypes").classList.add("err");return}obFinish(false)}else{OB.step++;obRender();var f=o.querySelector(".opt,.cell,#oage");if(f)f.focus()}return}
+    else if(d.onext!==undefined){if(!obValid())return;
+      if(OB.step===3){var te=termError(OB.term,OB.start,OB.end);if(te){var el=$("oterr");el.textContent=te;el.hidden=false;return}}
+      if(OB.step===OB_Q.length-1){if(!obTypesOk()){$("otyperr").hidden=false;$("otypes").classList.add("err");return}obFinish(false)}else{OB.step++;obRender();var f=o.querySelector(".opt,.cell,#oage");if(f)f.focus()}return}
     else return;
     var y=o.querySelector(".modal").scrollTop;obRender();o.querySelector(".modal").scrollTop=y;
     var nb=o.querySelector("[data-onext]");
@@ -680,7 +716,10 @@ function obBind(){
   });
   o.addEventListener("change",function(e){
     if(e.target.id==="oper")OB.per=+e.target.value;
-    else if(e.target.id==="ostart")OB.start=e.target.value;
+    else if(e.target.id==="ostart"||e.target.id==="oend"){
+      if(e.target.id==="ostart")OB.start=e.target.value;else OB.end=e.target.value;
+      var te=$("oterr");if(te)te.hidden=true;var oe=$("oend");if(oe)oe.min=OB.start||todayISO();
+    }
   });
 }
 function bind(){
@@ -694,7 +733,8 @@ function bind(){
   var f=$("filters");
   f.addEventListener("click",function(e){
     var b=e.target.closest("button");if(!b)return;var d=b.dataset;
-    if(d.mode){S.mode=d.mode;f.querySelectorAll("[data-mode]").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.mode===S.mode)});$("perwrap").hidden=S.mode!=="ferien"}
+    if(d.term){S.term=d.term;if(S.term==="kurz"&&!S.end)S.end=addDays(S.start||todayISO(),14);f.querySelectorAll("[data-term]").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.term===S.term)});$("dates").innerHTML=datesHTML()}
+    else if(d.mode){S.mode=d.mode;f.querySelectorAll("[data-mode]").forEach(function(x){x.setAttribute("aria-pressed",x.dataset.mode===S.mode)});$("perwrap").hidden=S.mode!=="ferien"}
     else if(d.k)S.grid[d.k]=S.grid[d.k]?0:1;
     else if(d.day){var ks=SLOTS.map(function(s){return d.day+"|"+s[0]});var on=ks.every(function(k){return S.grid[k]});ks.forEach(function(k){S.grid[k]=on?0:1})}
     else if(d.slot){var k2=ALLD.map(function(x){return x+"|"+d.slot});var on2=k2.every(function(k){return S.grid[k]});k2.forEach(function(k){S.grid[k]=on2?0:1})}
@@ -714,7 +754,12 @@ function bind(){
   f.addEventListener("change",function(e){
     var t=e.target;
     if(t.id==="gem")S.gem=t.value;else if(t.id==="per")S.per=+t.value;
-    else if(t.id==="start")S.start=t.value;else return;
+    else if(t.id==="start"||t.id==="end"){
+      if(t.id==="start")S.start=t.value;else S.end=t.value;
+      var er=termError(S.term,S.start,S.end),el=$("terr");
+      if(el){el.textContent=er;el.hidden=!er}
+      var en=$("end");if(en)en.min=S.start||todayISO();
+    }else return;
     update();
   });
   $("panel").addEventListener("click",function(e){
