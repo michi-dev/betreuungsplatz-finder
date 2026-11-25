@@ -118,6 +118,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .band input[type=number]{min-height:46px;border:2px solid transparent;border-radius:var(--r-input);padding:9px 12px;background:#fffaf3;color:#0f3e67;font-weight:700;width:100%}
 .band input[aria-invalid=true]{border-color:var(--orange)}
 
+.oerr{color:var(--orange-ink);font-weight:800}
+.opts.err .opt{border-color:var(--orange)}
+.ferr{color:#ffb399;font-weight:800;font-size:.9rem}
+
 /* Buttons */
 .btn{border:1.5px solid var(--btn);background:transparent;color:var(--ink);border-radius:80px;padding:10px 22px;cursor:pointer;font-weight:800;min-height:44px}
 .btn:hover{background:var(--surface)}
@@ -394,6 +398,7 @@ function miniGrid(r){
 }
 function listHTML(){
   var h='';
+  if(!typesOk())return '<div class="empty"><h3 style="margin-bottom:6px">Keine Betreuungsart gewählt</h3><p>Bitte wählen Sie mindestens eine Betreuungsart. Öffnen Sie dazu «Filter ändern».</p></div>';
   if(!needCells().length)return '<div class="empty"><h3 style="margin-bottom:6px">Wann brauchen Sie Betreuung?</h3><p>Wählen Sie oben mindestens einen Tag und eine Tageszeit.</p></div>';
   if(!S.last.length)return '<div class="empty"><h3 style="margin-bottom:6px">Keine passenden Angebote</h3><p>Ändern Sie Tage, Zeitraum oder Betreuungsart.</p></div>';
   h+='<div class="sidehead"><h2>'+S.last.length+' Angebote</h2><p class="small muted">Zahl = freie von gesuchten Zeiten</p></div><ul class="rows">';
@@ -485,6 +490,7 @@ var tt;function toast(m){var t=$("toast");t.textContent=m;t.hidden=false;clearTi
 
 /* Ereignisse */
 function tog(list,attr,obj){return list.map(function(x){return '<button type="button" data-'+attr+'="'+x[0]+'" aria-pressed="'+(!!obj[x[0]])+'">'+x[1]+'</button>'}).join("")}
+function typesOk(){return Object.keys(S.types).some(function(k){return S.types[k]})}
 function summaryText(){
   if(!S.ready)return "Noch keine Auswahl";
   var ks=needCells(),per=S.mode==="ferien"?PERIODS[S.per].split(" (")[0]:"Normale Woche",head=ageLabel(S.age)+" · "+S.gem+" · ";
@@ -515,7 +521,7 @@ function buildFilters(){
    '<div class="fg"><label class="fl" for="gem">Wohnort</label><select id="gem">'+Object.keys(GEM).sort().map(function(g){return '<option'+(g===S.gem?" selected":"")+'>'+g+'</option>'}).join("")+'</select></div>'+
    '<div class="fg wide"><span class="fl">Zeitraum</span><div class="tog" data-grp="mode"><button type="button" data-mode="normal" aria-pressed="'+(S.mode==="normal")+'">Normale Woche</button><button type="button" data-mode="ferien" aria-pressed="'+(S.mode==="ferien")+'">Schulferien</button></div></div>'+
    '<div class="fg wide" id="perwrap"'+(S.mode==="ferien"?"":" hidden")+'><label class="fl" for="per">Ferienperiode</label><select id="per">'+PERIODS.map(function(p,i){return '<option value="'+i+'"'+(i===S.per?" selected":"")+'>'+p+'</option>'}).join("")+'</select></div>'+
-   '<div class="fg wide"><span class="fl">Betreuungsart</span><div class="tog">'+tog(types,"t",S.types)+'</div></div>'+
+   '<div class="fg wide"><span class="fl">Betreuungsart</span><div class="tog">'+tog(types,"t",S.types)+'</div><p class="ferr" id="ferr" role="alert"'+(typesOk()?" hidden":"")+'>Bitte wählen Sie mindestens eine Betreuungsart.</p></div>'+
    '<div class="fg"><label class="fl" for="start">Gewünschter Start</label><input type="date" id="start" value="'+S.start+'"></div></div>'+
    '<div class="fg fright"><span class="fl">Betreuungszeiten pro Tag</span><div class="bwk" id="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+
      DAYS.map(function(d){return '<button type="button" class="h" data-day="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
@@ -529,8 +535,9 @@ function obValid(){
   if(OB.step===0)return OB.age!==null;
   if(OB.step===1)return OB.gem!==null;
   if(OB.step===2)return Object.keys(OB.grid).some(function(k){return OB.grid[k]});
-  return Object.keys(OB.types).some(function(k){return OB.types[k]});
+  return true;
 }
+function obTypesOk(){return Object.keys(OB.types).some(function(k){return OB.types[k]})}
 function obOpen(){OB.step=0;OB.start=S.start;$("ob").hidden=false;obRender();var a=$("oage");if(a)a.focus()}
 function obRender(){
   var n=OB.step,b="";
@@ -545,8 +552,8 @@ function obRender(){
       '<div class="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+DAYS.map(function(d){return '<button type="button" class="h" data-oday="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
       SLOTS.map(function(s){return '<button type="button" class="rl" data-oslot="'+s[0]+'">'+SHORT[s[0]]+'<span>'+s[2]+'</span></button>'+DAYS.map(function(d){var k=d[0]+"|"+s[0];return '<button type="button" class="cell" data-ok="'+k+'" aria-pressed="'+(!!OB.grid[k])+'" aria-label="'+d[2]+' '+s[1]+'"></button>'}).join("")}).join("")+'</div>';
   }else{
-    b='<p class="obhint">Wählen Sie mindestens eine Art. Mehrere sind möglich.</p><div class="opts" role="group" aria-label="Betreuungsart">'+Object.keys(TYPES).map(function(k){return '<button type="button" class="opt" data-ot="'+k+'" aria-pressed="'+(!!OB.types[k])+'">'+TYPES[k]+'</button>'}).join("")+'</div>'+
-      '<div class="field" style="margin:0"><label for="ostart">Gewünschter Start</label><input type="date" id="ostart" value="'+OB.start+'"></div>';
+    b='<p class="obhint">Wählen Sie mindestens eine Art. Mehrere sind möglich.</p><div class="opts" id="otypes" role="group" aria-label="Betreuungsart">'+Object.keys(TYPES).map(function(k){return '<button type="button" class="opt" data-ot="'+k+'" aria-pressed="'+(!!OB.types[k])+'">'+TYPES[k]+'</button>'}).join("")+'</div>'+
+      '<p class="oerr" id="otyperr" role="alert" hidden>Bitte wählen Sie mindestens eine Betreuungsart.</p><div class="field" style="margin:0"><label for="ostart">Gewünschter Start</label><input type="date" id="ostart" value="'+OB.start+'"></div>';
   }
   var prog='<div class="obprog" aria-hidden="true">'+OB_Q.map(function(q,i){return '<i class="'+(i<=n?"on":"")+'"></i>'}).join("")+'</div>';
   $("obm").innerHTML=prog+'<div class="eyebrow">Schritt '+(n+1)+' von '+OB_Q.length+'</div><h2 class="obq" id="obt">'+OB_Q[n]+'</h2><div class="obbody">'+b+'</div>'+
@@ -585,7 +592,7 @@ function obBind(){
     else if(d.ot)OB.types[d.ot]=OB.types[d.ot]?0:1;
     else if(d.oback!==undefined){OB.step--;obRender();return}
     else if(d.oskip!==undefined){obFinish(true);return}
-    else if(d.onext!==undefined){if(!obValid())return;if(OB.step===OB_Q.length-1){obFinish(false)}else{OB.step++;obRender();var f=o.querySelector(".opt,.cell,#oage");if(f)f.focus()}return}
+    else if(d.onext!==undefined){if(!obValid())return;if(OB.step===OB_Q.length-1){if(!obTypesOk()){$("otyperr").hidden=false;$("otypes").classList.add("err");return}obFinish(false)}else{OB.step++;obRender();var f=o.querySelector(".opt,.cell,#oage");if(f)f.focus()}return}
     else return;
     var y=o.querySelector(".modal").scrollTop;obRender();o.querySelector(".modal").scrollTop=y;
     var nb=o.querySelector("[data-onext]");
@@ -622,7 +629,7 @@ function bind(){
     else if(d.t)S.types[d.t]=S.types[d.t]?0:1;
     else return;
     f.querySelectorAll("#wk .cell").forEach(function(c){c.setAttribute("aria-pressed",!!S.grid[c.dataset.k])});
-    if(d.t)b.setAttribute("aria-pressed",!!S.types[d.t]);
+    if(d.t){b.setAttribute("aria-pressed",!!S.types[d.t]);$("ferr").hidden=typesOk()}
     update();
   });
   f.addEventListener("input",function(e){
