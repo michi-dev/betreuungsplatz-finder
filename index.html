@@ -56,14 +56,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 
 /* Filter im Band */
-.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px 20px;align-items:start}
-.fg{display:flex;flex-direction:column;gap:6px;min-width:0}
+.filters{display:flex;flex-wrap:wrap;gap:16px 40px;align-items:flex-start}
+.fcol{display:grid;grid-template-columns:repeat(2,minmax(150px,1fr));gap:10px 14px;flex:1 1 360px;max-width:520px;align-content:start}
+.fcol .wide{grid-column:1/-1}
+.fright{flex:1 1 380px;max-width:520px}
+.fg{display:flex;flex-direction:column;gap:5px;min-width:0}
 .fg.wide{grid-column:span 2}
 @media(max-width:560px){.fg.wide{grid-column:auto}}
 .fl{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;font-weight:800;opacity:.78}
 .band select,.band input[type=date]{width:100%;min-height:46px;border:0;border-radius:var(--r-input);padding:9px 12px;background:#fffaf3;color:#0f3e67;font-weight:700}
 .tog{display:flex;flex-wrap:wrap;gap:6px}
-.tog button{border:1.5px solid rgba(255,250,243,.45);background:transparent;color:#fffaf3;border-radius:80px;padding:6px 14px;min-height:40px;cursor:pointer;font-weight:700}
+.tog button{border:1.5px solid rgba(255,250,243,.45);background:transparent;color:#fffaf3;border-radius:80px;padding:5px 14px;min-height:38px;cursor:pointer;font-weight:700}
 .tog button:hover{background:rgba(255,250,243,.14)}
 .tog button[aria-pressed=true]{background:var(--orange);border-color:var(--orange);color:#0c2f4d}
 .band details.more{grid-column:1/-1;margin:0}
@@ -82,6 +85,39 @@ button,input,select,textarea{font:inherit;color:inherit}
 .bwk .cell[aria-pressed=true]{background:var(--orange)}
 .bwk .cell[aria-pressed=true]::after{content:"✓";color:#0c2f4d;font-weight:800}
 
+.band .bt{gap:8px 20px}
+.band.closed{padding-block:14px;gap:0}
+.band.closed h1{font-size:1.3rem}
+.fsum{flex:1 1 260px;color:#d8e0ea;font-size:.95rem;min-width:0}
+.band:not(.closed) .fsum{display:none}
+.ftog{margin-left:auto;background:transparent;border:1.5px solid rgba(255,250,243,.55);color:#fffaf3;border-radius:80px;padding:6px 18px;min-height:40px;font-weight:800;cursor:pointer;white-space:nowrap}
+.ftog:hover{background:rgba(255,250,243,.14)}
+.band:not(.closed) .filters{margin-top:14px}
+
+/* Onboarding */
+.modal.ob{max-width:580px;gap:16px}
+.obprog{display:flex;gap:6px}
+.obprog i{height:5px;flex:1;border-radius:4px;background:var(--line)}
+.obprog i.on{background:var(--ink)}
+.obq{font-size:1.6rem}
+.obhint{color:var(--muted);font-size:.92rem}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:80px;padding:8px 16px;min-height:44px;cursor:pointer;font-weight:700}
+.opt:hover{border-color:var(--ink)}
+.opt[aria-pressed=true]{background:var(--btn);color:var(--btn-ink);border-color:var(--btn)}
+.obfoot{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;justify-content:flex-end;margin-top:4px}
+.obfoot .skip{margin-right:auto}
+.obbody{display:flex;flex-direction:column;gap:14px}
+
+.ageq{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ageq input{width:130px;min-height:52px;border:1.5px solid var(--line);border-radius:var(--r-input);padding:8px 14px;font-size:1.5rem;font-family:var(--font-display);font-weight:600;color:var(--ink);background:var(--tint)}
+.ageq .seg{min-width:200px}
+.agein{display:flex;gap:6px}
+.agein input{flex:1 1 70px;min-width:0}
+.agein select{flex:0 0 96px}
+.band input[type=number]{min-height:46px;border:2px solid transparent;border-radius:var(--r-input);padding:9px 12px;background:#fffaf3;color:#0f3e67;font-weight:700;width:100%}
+.band input[aria-invalid=true]{border-color:var(--orange)}
+
 /* Buttons */
 .btn{border:1.5px solid var(--btn);background:transparent;color:var(--ink);border-radius:80px;padding:10px 22px;cursor:pointer;font-weight:800;min-height:44px}
 .btn:hover{background:var(--surface)}
@@ -95,7 +131,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media(max-width:940px){.main{grid-template-columns:minmax(0,1fr)}}
 .mapcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:16px 16px 14px;display:flex;flex-direction:column;gap:10px;position:sticky;top:12px}
 @media(max-width:940px){.mapcard{position:static}}
-#map svg{display:block;width:100%;height:auto;max-height:calc(100vh - 150px);margin:0 auto}
+#map svg{display:block;width:100%;height:auto;max-height:calc(100vh - 120px);margin:0 auto}
 @media(max-width:940px){#map svg{max-height:68vh}}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.84rem;color:var(--muted);justify-content:center}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -205,11 +241,13 @@ footer.fn{font-size:.82rem;color:var(--muted);max-width:90ch}
 </style>
 
 <div class="wrap">
-  <section class="band" aria-labelledby="ah">
+  <section class="band closed" id="band" aria-labelledby="ah">
     <div class="bt">
       <h1 id="ah">Betreuungsplatz-Finder</h1>
+      <p class="fsum" id="fsum"></p>
+      <button class="ftog" id="ftog" type="button" aria-expanded="false" aria-controls="filters">Suche starten</button>
     </div>
-    <div class="filters" id="filters" role="search" aria-label="Filter"></div>
+    <div class="filters" id="filters" role="search" aria-label="Filter" hidden></div>
   </section>
 
   <div class="main">
@@ -227,6 +265,9 @@ footer.fn{font-size:.82rem;color:var(--muted);max-width:90ch}
 <div class="overlay" id="ov" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mt" id="modal"></div>
 </div>
+<div class="overlay" id="ob" hidden>
+  <div class="modal ob" role="dialog" aria-modal="true" aria-labelledby="obt" id="obm"></div>
+</div>
 <div class="toast" id="toast" hidden role="status"></div>
 
 <script>
@@ -237,7 +278,8 @@ var SLOTS=[["vm","Vormittag","07:00–12:00"],["mt","Mittag","11:30–14:00"],["
 var SHORT={vm:"Vorm.",mt:"Mitt.",nm:"Nachm."};
 var TYPES={kita:"Kita",tagesstruktur:"Tagesstruktur",mittagstisch:"Mittagstisch",tagesfamilie:"Tagesfamilie"};
 var GEM={Balzers:[47.06729,9.5046],Eschen:[47.20514,9.53507],Gamprin:[47.21372,9.51116],Mauren:[47.21259,9.55706],Nendeln:[47.2085,9.55299],Planken:[47.18166,9.5581],Ruggell:[47.2457,9.534],Schaan:[47.17416,9.52039],Schellenberg:[47.23838,9.54493],Triesen:[47.08265,9.55411],Triesenberg:[47.12679,9.56174],Vaduz:[47.14635,9.52615]};
-var AGES=[[3,"3 Monate"],[6,"6 Monate"],[9,"9 Monate"],[12,"1 Jahr"],[18,"1½ Jahre"],[24,"2 Jahre"],[30,"2½ Jahre"],[36,"3 Jahre"],[48,"4 Jahre"],[60,"5 Jahre"],[72,"6 Jahre"],[84,"7 Jahre"],[96,"8 Jahre"],[108,"9 Jahre"],[120,"10 Jahre"],[132,"11 Jahre"]];
+var MAXAGE=144;
+function ageMonths(v,u){var n=parseFloat(String(v).replace(",","."));if(!isFinite(n)||n<0)return null;var m=Math.round(u==="m"?n:n*12);return m>MAXAGE?null:m}
 var PERIODS=["Weihnachtsferien (21.12.–1.1.)","Fasnachtsferien (15.–19.2.)","Sommerferien (Juli/August)"];
 var ALLD=DAYS.map(function(d){return d[0]}), ALLS=SLOTS.map(function(s){return s[0]});
 
@@ -290,7 +332,7 @@ function getAvail(inst,mode,per){
 }
 var minsAgo=function(inst){return 2+(inst.seed*7)%47};
 
-var S={age:24,gem:"Eschen",mode:"normal",per:0,grid:{},types:{kita:1,tagesstruktur:1,mittagstisch:1,tagesfamilie:1},start:"",last:[],view:"list",sel:null,hidden:0};
+var S={age:24,ageVal:"2",ageUnit:"j",gem:"Eschen",mode:"normal",per:0,grid:{},types:{kita:1,tagesstruktur:1,mittagstisch:1,tagesfamilie:1},start:"",ready:false,last:[],view:"list",sel:null,hidden:0};
 ["mo","mi","do"].forEach(function(d){ALLS.forEach(function(s){S.grid[d+"|"+s]=1})});
 (function(){var t=new Date();t.setMonth(t.getMonth()+1,1);S.start=t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-01"})();
 
@@ -298,7 +340,7 @@ var $=function(id){return document.getElementById(id)};
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function dist(a,b){var R=6371,t=Math.PI/180,dl=(b[0]-a[0])*t,dn=(b[1]-a[1])*t;var x=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a[0]*t)*Math.cos(b[0]*t)*Math.sin(dn/2)*Math.sin(dn/2);return 2*R*Math.asin(Math.sqrt(x))}
 function cellLabel(k){var p=k.split("|");var d=DAYS[ALLD.indexOf(p[0])],s=SLOTS[ALLS.indexOf(p[1])];return d[1]+" "+s[1]}
-function ageLabel(m){return AGES.filter(function(a){return a[0]===m})[0][1]}
+function ageLabel(m){if(m<12)return m+(m===1?" Monat":" Monate");var y=Math.floor(m/12),r=m%12;return y+(y===1?" Jahr":" Jahre")+(r?" "+r+" Mt.":"")}
 function needCells(){return Object.keys(S.grid).filter(function(k){return S.grid[k]})}
 
 /* Matching */
@@ -337,7 +379,7 @@ function renderMap(){
       '<title>'+esc(i.name)+'</title><circle class="ring" r="17"/><circle class="b" r="13"/><text>'+(r.ok.length||"–")+'</text></g>';
   });
   var hp=GEO.pt[S.gem];
-  s+='<g class="home"><circle class="o" cx="'+hp[0]+'" cy="'+hp[1]+'" r="6.5"/><text x="'+hp[0]+'" y="'+(hp[1]-12)+'">Zuhause</text></g></svg>';
+  if(S.ready)s+='<g class="home"><circle class="o" cx="'+hp[0]+'" cy="'+hp[1]+'" r="6.5"/><text x="'+hp[0]+'" y="'+(hp[1]-12)+'">Zuhause</text></g></svg>';
   $("map").innerHTML=s;
 }
 
@@ -382,6 +424,12 @@ function detailHTML(r){
     '<div class="actions">'+act+'</div><p class="note">Stand vor '+minsAgo(i)+' Min.</p></div>';
 }
 function update(){
+  $("fsum").textContent=summaryText();
+  if(!S.ready){
+    S.last=[];renderMap();
+    $("panel").innerHTML='<div class="empty"><h2 style="margin-bottom:8px;color:var(--ink)">Wo gibt es freie Plätze?</h2><p style="margin-bottom:16px">Beantworten Sie vier kurze Fragen. Dann zeigt die Karte die passenden Angebote.</p><button class="btn primary" data-ob type="button">Fragen starten</button></div>';
+    return;
+  }
   S.last=compute();
   if(S.sel&&!S.last.some(function(r){return r.inst.id===S.sel})){S.sel=null;if(S.view==="detail")S.view="list"}
   renderMap();
@@ -437,21 +485,129 @@ var tt;function toast(m){var t=$("toast");t.textContent=m;t.hidden=false;clearTi
 
 /* Ereignisse */
 function tog(list,attr,obj){return list.map(function(x){return '<button type="button" data-'+attr+'="'+x[0]+'" aria-pressed="'+(!!obj[x[0]])+'">'+x[1]+'</button>'}).join("")}
+function summaryText(){
+  if(!S.ready)return "Noch keine Auswahl";
+  var ks=needCells(),per=S.mode==="ferien"?PERIODS[S.per].split(" (")[0]:"Normale Woche",head=ageLabel(S.age)+" · "+S.gem+" · ";
+  if(!ks.length)return head+"keine Zeiten gewählt";
+  var by={};ks.forEach(function(k){var q=k.split("|");(by[q[0]]=by[q[0]]||[]).push(q[1])});
+  var days=ALLD.filter(function(d){return by[d]});
+  var sig=days.map(function(d){return ALLS.filter(function(s){return by[d].indexOf(s)>-1}).join()});
+  var same=sig.every(function(x){return x===sig[0]}),when;
+  if(same){
+    var idx=days.map(function(d){return ALLD.indexOf(d)}),run=idx.length>=3&&idx[idx.length-1]-idx[0]===idx.length-1;
+    var dl=run?DAYS[idx[0]][1]+"–"+DAYS[idx[idx.length-1]][1]:days.map(function(d){return DAYS[ALLD.indexOf(d)][1]}).join(", ");
+    var sl=sig[0].split(",");
+    when=dl+" "+(sl.length===3?"ganztags":sl.map(function(s){return SLOTS[ALLS.indexOf(s)][1].toLowerCase()}).join(" + "));
+  }else when=ks.length+" Zeiten pro Woche";
+  return head+when+" · "+per;
+}
+function setFilterOpen(open){
+  $("band").classList.toggle("closed",!open);
+  $("filters").hidden=!open;
+  $("ftog").setAttribute("aria-expanded",open);
+  $("ftog").innerHTML=(open?"Einklappen":"Filter ändern")+' <span aria-hidden="true">'+(open?"▴":"▾")+'</span>';
+}
 function buildFilters(){
   var types=Object.keys(TYPES).map(function(k){return [k,TYPES[k]]});
   $("filters").innerHTML=
-   '<div class="fg"><label class="fl" for="age">Alter des Kindes</label><select id="age">'+AGES.map(function(a){return '<option value="'+a[0]+'"'+(a[0]===S.age?" selected":"")+'>'+a[1]+'</option>'}).join("")+'</select></div>'+
+   '<div class="fcol">'+
+   '<div class="fg"><label class="fl" for="agev">Alter des Kindes</label><div class="agein"><input type="number" id="agev" min="0" step="any" inputmode="decimal" value="'+esc(S.ageVal)+'"><select id="ageu" aria-label="Einheit"><option value="j"'+(S.ageUnit==="j"?" selected":"")+'>Jahre</option><option value="m"'+(S.ageUnit==="m"?" selected":"")+'>Monate</option></select></div></div>'+
    '<div class="fg"><label class="fl" for="gem">Wohnort</label><select id="gem">'+Object.keys(GEM).sort().map(function(g){return '<option'+(g===S.gem?" selected":"")+'>'+g+'</option>'}).join("")+'</select></div>'+
-   '<div class="fg"><span class="fl">Zeitraum</span><div class="tog" data-grp="mode"><button type="button" data-mode="normal" aria-pressed="'+(S.mode==="normal")+'">Normale Woche</button><button type="button" data-mode="ferien" aria-pressed="'+(S.mode==="ferien")+'">Schulferien</button></div></div>'+
-   '<div class="fg" id="perwrap"'+(S.mode==="ferien"?"":" hidden")+'><label class="fl" for="per">Ferienperiode</label><select id="per">'+PERIODS.map(function(p,i){return '<option value="'+i+'"'+(i===S.per?" selected":"")+'>'+p+'</option>'}).join("")+'</select></div>'+
-   '<div class="fg wide"><span class="fl">Betreuungszeiten pro Tag</span><div class="bwk" id="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+
+   '<div class="fg wide"><span class="fl">Zeitraum</span><div class="tog" data-grp="mode"><button type="button" data-mode="normal" aria-pressed="'+(S.mode==="normal")+'">Normale Woche</button><button type="button" data-mode="ferien" aria-pressed="'+(S.mode==="ferien")+'">Schulferien</button></div></div>'+
+   '<div class="fg wide" id="perwrap"'+(S.mode==="ferien"?"":" hidden")+'><label class="fl" for="per">Ferienperiode</label><select id="per">'+PERIODS.map(function(p,i){return '<option value="'+i+'"'+(i===S.per?" selected":"")+'>'+p+'</option>'}).join("")+'</select></div>'+
+   '<div class="fg wide"><span class="fl">Betreuungsart</span><div class="tog">'+tog(types,"t",S.types)+'</div></div>'+
+   '<div class="fg"><label class="fl" for="start">Gewünschter Start</label><input type="date" id="start" value="'+S.start+'"></div></div>'+
+   '<div class="fg fright"><span class="fl">Betreuungszeiten pro Tag</span><div class="bwk" id="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+
      DAYS.map(function(d){return '<button type="button" class="h" data-day="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
      SLOTS.map(function(s){return '<button type="button" class="rl" data-slot="'+s[0]+'">'+SHORT[s[0]]+'<span>'+s[2]+'</span></button>'+DAYS.map(function(d){var k=d[0]+"|"+s[0];return '<button type="button" class="cell" data-k="'+k+'" aria-pressed="'+(!!S.grid[k])+'" aria-label="'+d[2]+' '+s[1]+'"></button>'}).join("")}).join("")+
-   '</div></div>'+
-   '<div class="fg wide"><span class="fl">Betreuungsart</span><div class="tog">'+tog(types,"t",S.types)+'</div></div>'+
-   '<div class="fg"><label class="fl" for="start">Gewünschter Start</label><input type="date" id="start" value="'+S.start+'"></div>';
+   '</div></div>';
+}
+/* Onboarding */
+var OB={step:0,age:null,ageVal:"",ageUnit:"j",gem:null,mode:"normal",per:0,grid:{},types:{kita:0,tagesstruktur:0,mittagstisch:0,tagesfamilie:0},start:""};
+var OB_Q=["Wie alt ist Ihr Kind?","Wo wohnen Sie?","Wann brauchen Sie Betreuung?","Welche Betreuung suchen Sie?"];
+function obValid(){
+  if(OB.step===0)return OB.age!==null;
+  if(OB.step===1)return OB.gem!==null;
+  if(OB.step===2)return Object.keys(OB.grid).some(function(k){return OB.grid[k]});
+  return Object.keys(OB.types).some(function(k){return OB.types[k]});
+}
+function obOpen(){OB.step=0;OB.start=S.start;$("ob").hidden=false;obRender();var a=$("oage");if(a)a.focus()}
+function obRender(){
+  var n=OB.step,b="";
+  if(n===0){
+    b='<p class="obhint">Tragen Sie das Alter selbst ein. Es bestimmt, welche Einrichtungen in Frage kommen.</p><div class="ageq"><input type="number" id="oage" min="0" step="any" inputmode="decimal" placeholder="z. B. 2" aria-label="Alter" value="'+esc(OB.ageVal)+'"><div class="seg" role="group" aria-label="Einheit"><button type="button" data-ounit="j" aria-pressed="'+(OB.ageUnit==="j")+'">Jahre</button><button type="button" data-ounit="m" aria-pressed="'+(OB.ageUnit==="m")+'">Monate</button></div></div><p class="small" id="oagehint" role="alert"></p>';
+  }else if(n===1){
+    b='<p class="obhint">Wir zeigen die Angebote auf der Karte ausgehend von Ihrer Gemeinde.</p><div class="opts" role="group" aria-label="Wohnort">'+Object.keys(GEM).sort().map(function(g){return '<button type="button" class="opt" data-ogem="'+g+'" aria-pressed="'+(OB.gem===g)+'">'+g+'</button>'}).join("")+'</div>';
+  }else if(n===2){
+    b='<div class="seg" role="group" aria-label="Zeitraum"><button type="button" data-omode="normal" aria-pressed="'+(OB.mode==="normal")+'">Normale Woche</button><button type="button" data-omode="ferien" aria-pressed="'+(OB.mode==="ferien")+'">Schulferien</button></div>'+
+      (OB.mode==="ferien"?'<div class="field" style="margin:0"><label for="oper">Ferienperiode</label><select id="oper">'+PERIODS.map(function(p,i){return '<option value="'+i+'"'+(i===OB.per?" selected":"")+'>'+p+'</option>'}).join("")+'</select></div>':"")+
+      '<p class="obhint">Tippen Sie die Zeiten an. Mit den Tagen oben und den Tageszeiten links wählen Sie ganze Spalten oder Zeilen.</p>'+
+      '<div class="wk" role="group" aria-label="Betreuungszeiten pro Tag"><span></span>'+DAYS.map(function(d){return '<button type="button" class="h" data-oday="'+d[0]+'" aria-label="Ganzer Tag '+d[2]+'">'+d[1]+'</button>'}).join("")+
+      SLOTS.map(function(s){return '<button type="button" class="rl" data-oslot="'+s[0]+'">'+SHORT[s[0]]+'<span>'+s[2]+'</span></button>'+DAYS.map(function(d){var k=d[0]+"|"+s[0];return '<button type="button" class="cell" data-ok="'+k+'" aria-pressed="'+(!!OB.grid[k])+'" aria-label="'+d[2]+' '+s[1]+'"></button>'}).join("")}).join("")+'</div>';
+  }else{
+    b='<p class="obhint">Wählen Sie mindestens eine Art. Mehrere sind möglich.</p><div class="opts" role="group" aria-label="Betreuungsart">'+Object.keys(TYPES).map(function(k){return '<button type="button" class="opt" data-ot="'+k+'" aria-pressed="'+(!!OB.types[k])+'">'+TYPES[k]+'</button>'}).join("")+'</div>'+
+      '<div class="field" style="margin:0"><label for="ostart">Gewünschter Start</label><input type="date" id="ostart" value="'+OB.start+'"></div>';
+  }
+  var prog='<div class="obprog" aria-hidden="true">'+OB_Q.map(function(q,i){return '<i class="'+(i<=n?"on":"")+'"></i>'}).join("")+'</div>';
+  $("obm").innerHTML=prog+'<div class="eyebrow">Schritt '+(n+1)+' von '+OB_Q.length+'</div><h2 class="obq" id="obt">'+OB_Q[n]+'</h2><div class="obbody">'+b+'</div>'+
+    '<div class="obfoot"><button type="button" class="link skip" data-oskip>Überspringen und Beispiel ansehen</button>'+(n>0?'<button type="button" class="btn" data-oback>Zurück</button>':"")+
+    '<button type="button" class="btn primary" data-onext'+(obValid()?"":" disabled")+'>'+(n===OB_Q.length-1?"Plätze anzeigen":"Weiter")+'</button></div>';
+}
+function obAgeHint(){
+  var el=$("oagehint");if(!el)return;
+  var hint="";
+  if(OB.ageVal!==""&&OB.age===null)hint="Bitte geben Sie eine Zahl von 0 bis "+(OB.ageUnit==="m"?MAXAGE+" Monaten":MAXAGE/12+" Jahren")+" ein.";
+  else if(OB.age!==null)hint="Das entspricht "+ageLabel(OB.age);
+  el.textContent=hint;el.style.color=(OB.ageVal!==""&&OB.age===null)?"var(--orange-ink)":"var(--muted)";
+}
+function obFinish(useDefaults){
+  if(!useDefaults){
+    S.age=OB.age;S.ageVal=OB.ageVal;S.ageUnit=OB.ageUnit;S.gem=OB.gem;S.mode=OB.mode;S.per=OB.per;S.grid={};
+    Object.keys(OB.grid).forEach(function(k){if(OB.grid[k])S.grid[k]=1});
+    S.types={};Object.keys(TYPES).forEach(function(k){S.types[k]=OB.types[k]?1:0});
+    if(OB.start)S.start=OB.start;
+  }
+  S.ready=true;S.view="list";S.sel=null;
+  $("ob").hidden=true;
+  buildFilters();setFilterOpen(false);update();
+  if(window.innerWidth<=940)$("map").scrollIntoView({behavior:"smooth",block:"start"});
+}
+function obBind(){
+  var o=$("ob");
+  o.addEventListener("click",function(e){
+    var b=e.target.closest("button");if(!b)return;var d=b.dataset;
+    if(d.ounit){OB.ageUnit=d.ounit;OB.age=ageMonths(OB.ageVal,OB.ageUnit);obRender();var ai=o.querySelector("#oage");if(ai){ai.focus();obAgeHint()}return}
+    else if(d.ogem)OB.gem=d.ogem;
+    else if(d.omode)OB.mode=d.omode;
+    else if(d.ok)OB.grid[d.ok]=OB.grid[d.ok]?0:1;
+    else if(d.oday){var ks=SLOTS.map(function(s){return d.oday+"|"+s[0]});var on=ks.every(function(k){return OB.grid[k]});ks.forEach(function(k){OB.grid[k]=on?0:1})}
+    else if(d.oslot){var k2=ALLD.map(function(x){return x+"|"+d.oslot});var on2=k2.every(function(k){return OB.grid[k]});k2.forEach(function(k){OB.grid[k]=on2?0:1})}
+    else if(d.ot)OB.types[d.ot]=OB.types[d.ot]?0:1;
+    else if(d.oback!==undefined){OB.step--;obRender();return}
+    else if(d.oskip!==undefined){obFinish(true);return}
+    else if(d.onext!==undefined){if(!obValid())return;if(OB.step===OB_Q.length-1){obFinish(false)}else{OB.step++;obRender();var f=o.querySelector(".opt,.cell,#oage");if(f)f.focus()}return}
+    else return;
+    var y=o.querySelector(".modal").scrollTop;obRender();o.querySelector(".modal").scrollTop=y;
+    var nb=o.querySelector("[data-onext]");
+    if(d.ogem)nb.focus();
+  });
+  o.addEventListener("input",function(e){
+    if(e.target.id!=="oage")return;
+    OB.ageVal=e.target.value;OB.age=ageMonths(OB.ageVal,OB.ageUnit);
+    var nb=o.querySelector("[data-onext]");if(nb)nb.disabled=!obValid();
+    obAgeHint();
+  });
+  o.addEventListener("keydown",function(e){
+    if(e.key==="Enter"&&e.target.id==="oage"){e.preventDefault();var nb=o.querySelector("[data-onext]");if(nb&&!nb.disabled)nb.click()}
+  });
+  o.addEventListener("change",function(e){
+    if(e.target.id==="oper")OB.per=+e.target.value;
+    else if(e.target.id==="ostart")OB.start=e.target.value;
+  });
 }
 function bind(){
+  $("ftog").addEventListener("click",function(){if(!S.ready){obOpen();return}setFilterOpen($("filters").hidden)});
+  obBind();
   $("sim").addEventListener("click",simulate);
   var map=$("map");
   map.addEventListener("click",function(e){var m=e.target.closest("[data-id]");if(m)select(m.getAttribute("data-id"))});
@@ -469,15 +625,23 @@ function bind(){
     if(d.t)b.setAttribute("aria-pressed",!!S.types[d.t]);
     update();
   });
+  f.addEventListener("input",function(e){
+    var t=e.target;if(t.id!=="agev"&&t.id!=="ageu")return;
+    S.ageVal=$("agev").value;S.ageUnit=$("ageu").value;
+    var m=ageMonths(S.ageVal,S.ageUnit);
+    if(m===null){$("agev").setAttribute("aria-invalid","true");return}
+    $("agev").removeAttribute("aria-invalid");S.age=m;update();
+  });
   f.addEventListener("change",function(e){
     var t=e.target;
-    if(t.id==="age")S.age=+t.value;else if(t.id==="gem")S.gem=t.value;else if(t.id==="per")S.per=+t.value;
+    if(t.id==="gem")S.gem=t.value;else if(t.id==="per")S.per=+t.value;
     else if(t.id==="start")S.start=t.value;else return;
     update();
   });
   $("panel").addEventListener("click",function(e){
     var b=e.target.closest("button");if(!b)return;var d=b.dataset;
-    if(d.sel)select(d.sel);
+    if(d.ob!==undefined)obOpen();
+    else if(d.sel)select(d.sel);
     else if(d.back!==undefined){S.view="list";update()}
     else if(d.res)openRes(d.res,"res");
     else if(d.wait)openRes(d.wait,"wait");
@@ -487,6 +651,6 @@ function bind(){
   $("ov").addEventListener("click",function(e){if(e.target===$("ov"))closeModal()});
   document.addEventListener("keydown",function(e){if(e.key==="Escape"&&!$("ov").hidden)closeModal()});
 }
-buildFilters();bind();update();
+buildFilters();bind();update();obOpen();
 })();
 </script>
